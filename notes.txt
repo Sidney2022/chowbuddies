@@ -1,0 +1,30 @@
+before deploying ;  
+- go through all models and remove any unneccesary default fields.
+- delete all migration fields
+- clean up code; remove all unneccesary comments
+- confirm permissions and authentication
+- figure out how to add min_value validation on certain model fields
+
+
+
+
+
+on update cart, check available stock and confirm that product is still in stock
+on view cart;
+also confirm if product is still in stock. if product is in stock, display cart detail else return an error message
+
+
+
+admin panel
+admin can;
+- view all users; customers and producers
+- modify status of producers
+- view all uploaded products
+- modify published state of product
+- delete product
+- view all orders
+- modify status of orders
+- view and modify product categories
+- send emeil if needed
+- 
+
