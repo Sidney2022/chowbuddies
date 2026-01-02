@@ -127,18 +127,21 @@ class CartView(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericA
 
     def post(self, request, *args, **kwargs):
         request_data = request.data.copy()
+        # print(f"submitted data - {request_data} {request_data.get('product_id')}")
         cart  = get_cart(self.request.user)
+        product = Product.objects.get(id=request_data.get('product_id'))
         request_data['cart'] = cart.id
+        request_data['product'] = product.id
         serializer = self.get_serializer(data=request_data, partial=True)
         if serializer.is_valid():
             try:
                 serializer.save()
                 return Response( serializer.data , status=status.HTTP_201_CREATED)
             except Exception as e :
-                return Response({"error":f'{e}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                return Response({"error":f'{e}'}, status=status.HTTP_400_BAD_REQUEST)
         else:
             errors = [{"field": key, "message": str(value[0])} for key, value in serializer.errors.items()]
-            return Response({"errors": errors}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+            return Response({"errors": errors}, status=status.HTTP_400_BAD_REQUEST)
         
 
 class CartDetailView(mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
@@ -179,7 +182,7 @@ class CartDetailView(mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
     
 class ProductView(mixins.ListModelMixin, mixins.CreateModelMixin,
                   generics.GenericAPIView): 
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
         
@@ -814,7 +817,6 @@ class LogoutView(APIView):
 
     def post(self, request):
         try:
-            # Get refresh token from request body
             refresh_token = request.data.get("refresh_token")
             if not refresh_token:
                 logger.error("Refresh token not provided")
@@ -822,7 +824,6 @@ class LogoutView(APIView):
                     {"error": "Refresh token is required"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-
             # Blacklist refresh token
             refresh = RefreshToken(refresh_token)
             refresh.blacklist()
@@ -830,14 +831,13 @@ class LogoutView(APIView):
 
             # Get access token from Authorization header
             auth_header = request.headers.get("Authorization", "")
-            if not auth_header.startswith("Bearer "):
+            if not auth_header.startswith("Bearer"):
                 logger.warning("No Bearer token found in Authorization header")
                 return Response(
                     {"error": "Access token required in Authorization header"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
             access_token = auth_header.split(" ")[1]
-
             # Blacklist access token
             access = AccessToken(access_token)
             outstanding_token = OutstandingToken.objects.create(
@@ -846,16 +846,13 @@ class LogoutView(APIView):
                 token=str(access),
                 created_at=timezone.now(),
                 expires_at=timezone.now(),
-            )
-            
+            )    
             BlacklistedToken.objects.create(token=outstanding_token, blacklisted_at=timezone.now())
             logger.info(f"Access token blacklisted: {access['jti']}")
-
             return Response(
                 {"status": "success", "message": "Logout successful"},
                 status=status.HTTP_205_RESET_CONTENT
             )
-
         except Exception as e:
             logger.error(f"Logout error: {e}")
             return Response(
@@ -1079,5 +1076,27 @@ class PaymentMethodView(generics.ListAPIView, generics.RetrieveAPIView):
         return self.list(self, *args, **kwargs)
     
 
+from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+# from .models import VaccinationRecord
 
+@csrf_exempt
+def ussd_endpoint(request):
+    phone_number = request.POST.get('phoneNumber')
+    text = request.POST.get('text', '')
+    response = ''
+
+    if text == '':
+        response = "CON Welcome to Vet Konnect\n1. Check Vaccination Status"
+    elif text == '1':
+        records = True #VaccinationRecord.objects.filter(farmer_phone=phone_number)
+        if records:
+            # latest = records.latest('date')
+            response = f"END Latest Vaccination: vaccinated on today"
+        else:
+            response = "END No vaccination records found."
+    else:
+        response = "END Invalid Option"
+
+    return HttpResponse(response)
 

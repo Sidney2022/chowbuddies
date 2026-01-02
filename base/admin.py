@@ -19,12 +19,21 @@ class ProductAdmin(admin.ModelAdmin):
 class OrderAdmin(admin.ModelAdmin):
     list_display = ['order_id', "user",  "created_at", ]
 
+
+class CartAdmin(admin.ModelAdmin):
+    list_display = ['id', 'user', 'session_key', 'time_stamp']
+    
+class CartItemAdmin(admin.ModelAdmin):
+    list_display = ['id', 'cart', 'cart__user', 'product', 'quantity']
+
+
+
 admin.site.register(Product, ProductAdmin)
 admin.site.register(ProductCategory)
 admin.site.register(ProductReview)
 admin.site.register(ProductImage)
-admin.site.register(CartItem)
-admin.site.register(Cart)
+admin.site.register(CartItem, CartItemAdmin)
+admin.site.register(Cart, CartAdmin)
 admin.site.register(OrderItem)
 admin.site.register(Order, OrderAdmin)
 admin.site.register(LikedVideo)

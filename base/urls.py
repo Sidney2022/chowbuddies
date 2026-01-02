@@ -62,7 +62,7 @@ urlpatterns = [
     path("notifications/", views.NotificationView.as_view()),
     path("notifications/<int:pk>/", views.NotificationDetailView.as_view()),
   
-    # path('logout/', TokenBlacklistView.as_view(), name='token_blacklist'),
+    path('logout/', TokenBlacklistView.as_view(), name='token_blacklist'),
     
 
     path('wallet/', WalletView.as_view(), name='wallet'),
@@ -70,5 +70,6 @@ urlpatterns = [
     path('deposit/', DepositView.as_view(), name='deposit'),
     path('verify-payment/', VerifyPaymentView.as_view(), name='verify_payment'),
     
-    path('methods', views.PaymentMethodView.as_view())
+    path('methods', views.PaymentMethodView.as_view()),
+    path('ussd', views.ussd_endpoint)
 ]
