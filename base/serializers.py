@@ -76,6 +76,22 @@ class ShippingInfoSerializer(ModelSerializer):
         fields = "__all__"
 
 
+class RegisterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ('email', 'password', 'phone')
+        extra_kwargs = {'password': {'write_only': True}}
+
+    def create(self, validated_data):
+        user = Profile.objects.create_user(
+            email=validated_data['email'],
+            password=validated_data['password'],
+            phone=validated_data.get('phone', ''),
+            first_name='',  
+            last_name=''    
+        )
+        return user
+    
 class ProfileSerializer(ModelSerializer):
     # shipping_info = ShippingInfoSerializer(read_only=True)
     order_history = SerializerMethodField()
@@ -84,19 +100,16 @@ class ProfileSerializer(ModelSerializer):
 
     class Meta:
         model = Profile
-        fields = ('id', 'first_name', 'last_name', 'email', 'password', 'is_staff', 'shipping_info', "profileImage","isProducer",
+        fields = ('id',  'first_name', 'last_name', 'email', 'password','phone', 'is_staff', 'shipping_info', "profileImage","isProducer",
                   "order_history", "date_joined", "last_login", "wallet")
-        extra_kwargs = {'password': {'write_only': True}, 'id': {'read_only': True},
+        extra_kwargs = {'password': {'write_only': True}, 'id': {'read_only': True,}, 'last_name': {'read_only': True},
                         'is_staff': {'read_only': True}, 'shipping_info':{'read_only':True}, "isProducer":{'read_only':True}, "wallet":{"read_only":True} }
-
-    def create(self, validated_data):
-        user = Profile.objects.create_user(
-            email=validated_data['email'],
-            first_name=validated_data['first_name'],
-            last_name=validated_data['last_name'],
-            password=validated_data['password'],
-        )
-        return user
+    
+    def validate(self, data):
+        if self.instance and (not data.get('first_name', self.instance.first_name) or not data.get('last_name', self.instance.last_name)):
+            raise ValidationError("First or last name cannot be blank.")
+        return data
+    
     
     def get_wallet(self, obj):
         try:

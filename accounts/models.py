@@ -71,7 +71,9 @@ class Profile(AbstractUser):
     phone = models.CharField(max_length=13)
     is_deleted = models.BooleanField(default=False)
     profileImage = models.ImageField(default="profiles/blank-profile.png", upload_to="profiles")
-   
+    is_active = models.BooleanField(default=False)
+    
+    
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = [ ]  
 
@@ -132,17 +134,22 @@ class PasswordResetRequest(models.Model):
             return False
         return True 
 
+    
+def generate_random_id():
+    return str(random.randint(1000, 9999))
+
 
 class VerifyEmailToken(models.Model):
     user = models.ForeignKey(Profile, on_delete=models.CASCADE)
-    token = models.CharField(max_length=5)
+    token = models.CharField(max_length=4, default=generate_random_id, unique=True, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
     used = models.BooleanField(default=False)
     
 
     def token_valid(self):
         time_sent =   datetime.now().timestamp() - self.created_at.timestamp()
-        time_in_hrs = time_sent/(60*60) 
+        time_in_hrs = time_sent/(60) 
+        print(f'time sent is {time_sent} and time in hrs is {time_in_hrs}')
         if time_in_hrs > 2:
             return False
         else:

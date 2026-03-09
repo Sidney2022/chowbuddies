@@ -14,7 +14,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 SECRET_KEY=os.getenv('SECRET_KEY')
-DEBUG = os.getenv('DEBUG', '0') == '1'
+DEBUG = True #os.getenv('DEBUG', '0') == '1'
 
 ALLOWED_HOSTS = ['*'] 
 
@@ -56,7 +56,7 @@ ROOT_URLCONF = 'chowbuddies.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -154,6 +154,14 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 STATICFILES_DIRS = [  os.path.join(BASE_DIR, 'static'), ]
 STATICFILES_STORAGE="whitenoise.storage.CompressedManifestStaticFilesStorage" 
 
+
+EMAIL_HOST = os.getenv("EMAIL_HOST")
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_USE_TLS = bool(os.getenv('EMAIL_USE_TLS'))
+EMAIL_PORT = os.getenv('PORT')
+DEFAULT_FROM_EMAIL = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 LOGGING = {
     'version': 1,

@@ -3,8 +3,8 @@ from django.http import JsonResponse, HttpResponse
 from rest_framework.response import Response 
 from rest_framework.views import APIView 
 from .models import Product, ProductCategory, ProductImage, ProductReview, Cart,  CartItem, Order, OrderItem, FAQ, VideoTutorial, VideoComment, LikedVideo, DisLikedVideo, SavedVideo, Notification, Wallet, WalletTransaction, PaymentMethod
-from accounts.models import Producer, Profile
-from .serializers import ProducerSerializer, FAQSerializer, ProductSerializer, ProfileSerializer, VideoCommentSerializer, ProductCategorySerializer, CartSerializer, VideoTutorialSerializer, NotificationSerializer, ProductReviewSerializer, CartItemSerializer, OrderSerializer, SavedVideoSerializer, LikedVideoSerializer, DisLikedVideoSerializer, WalletSerializer, PaymentMethodSerializer
+from accounts.models import Producer, Profile, VerifyEmailToken
+from .serializers import ProducerSerializer, FAQSerializer, ProductSerializer, ProfileSerializer, VideoCommentSerializer, ProductCategorySerializer, CartSerializer, VideoTutorialSerializer, NotificationSerializer, ProductReviewSerializer, CartItemSerializer, OrderSerializer, SavedVideoSerializer, LikedVideoSerializer, DisLikedVideoSerializer, WalletSerializer, PaymentMethodSerializer, RegisterSerializer
 from rest_framework import status, mixins, generics, viewsets
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth import authenticate
@@ -20,7 +20,7 @@ from django.db.models import Avg, Count, Q
 from .utils.generic import get_cart, create_log
 from django.conf import settings
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
-
+from .utils.generic import send_email_funct
 
 class HomePage(APIView):
     def get(self, request):
@@ -45,12 +45,15 @@ class ProfileDetailView(mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
     lookup_field = 'id'
+    
+   
 
     def get(self, request, *args, **kwargs):
         return self.retrieve(request, *args, **kwargs)
  
     def put(self, request, *args, **kwargs):
         instance = self.get_object()
+        print(self.request.user)
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
@@ -697,48 +700,57 @@ class GetWallet(generics.RetrieveAPIView):
 
 # auth related endpoints
 class RegisterView(CreateAPIView):
-    serializer_class = ProfileSerializer
+    serializer_class = RegisterSerializer
 
     def perform_create(self, serializer):
         user = serializer.save()
         user.username=user.id
+        user.first_name=''
+        user.last_name=''
         user.set_password(self.request.data['password'])
         user.save()
-
-        # Create JWT tokens
-        refresh = RefreshToken.for_user(user)
-        access_token = str(refresh.access_token)
 
         # Prepare response data
         self.response_data = {
             "status": "success",
             "message": "Registration successful",
-            "data": {
-                "accessToken": access_token,
-                "user": {
-                    "user_id": str(user.id),
-                    "first_name": user.first_name,
-                    "last_name": user.last_name,
-                    "email": user.email,
-                }
-            }
         }
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
-        print(serializer.is_valid())
         if serializer.is_valid():
             try:
                 self.perform_create(serializer)
+                token=VerifyEmailToken.objects.create(user=serializer.instance)
+                context = {
+                        'website_name':"Chowbuddies",
+                        "website_domain":"chowbuddies.com",
+                        "token_code": token.token,
+                        }
+                send_email_funct(recipient=serializer.instance.email, template_name='welcome', subject='Verify Your Email', context=context)
                 return Response(self.response_data, status=status.HTTP_201_CREATED)
             except Exception as e :
                 return Response({"error":f'{e}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         else:
-            print(serializer)
-            # Handle validation errors
             errors = [{"field": key, "message": str(value[0])} for key, value in serializer.errors.items()]
             return Response({"errors": errors}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
+
+def verify_email(request, token, email):        
+    
+    try:
+        user=Profile.objects.get(email=email)
+        token_record = VerifyEmailToken.objects.get(token=token, user=user)
+        if not token_record.token_valid:
+            return JsonResponse({"error": "Invalid or expired token."}, status=400)
+        user = token_record.user
+        user.is_active = True
+        user.save()
+        token_record.delete()  # Optionally delete the token after verification
+        return JsonResponse({"message": "Email verified successfully."})
+    except VerifyEmailToken.DoesNotExist:
+        return JsonResponse({"error": "Invalid or expired token."}, status=400)
+    
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
@@ -1075,28 +1087,4 @@ class PaymentMethodView(generics.ListAPIView, generics.RetrieveAPIView):
     def get(self, request, *args, **kwargs):
         return self.list(self, *args, **kwargs)
     
-
-from django.http import HttpResponse
-from django.views.decorators.csrf import csrf_exempt
-# from .models import VaccinationRecord
-
-@csrf_exempt
-def ussd_endpoint(request):
-    phone_number = request.POST.get('phoneNumber')
-    text = request.POST.get('text', '')
-    response = ''
-
-    if text == '':
-        response = "CON Welcome to Vet Konnect\n1. Check Vaccination Status"
-    elif text == '1':
-        records = True #VaccinationRecord.objects.filter(farmer_phone=phone_number)
-        if records:
-            # latest = records.latest('date')
-            response = f"END Latest Vaccination: vaccinated on today"
-        else:
-            response = "END No vaccination records found."
-    else:
-        response = "END Invalid Option"
-
-    return HttpResponse(response)
 
