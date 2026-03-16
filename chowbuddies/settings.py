@@ -76,7 +76,7 @@ WSGI_APPLICATION = 'chowbuddies.wsgi.application'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 # chowbuddies/settings.py
 
-# DATABASE_URL = os.getenv('DATABASE_URL')
+DATABASE_URL = os.getenv('DATABASE_URL')
 # if DATABASE_URL:
 #     db_info = urlparse(DATABASE_URL)
 #     DATABASES = {
@@ -91,12 +91,12 @@ WSGI_APPLICATION = 'chowbuddies.wsgi.application'
 #     }
 # else:
     # Fallback to SQLite
-DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-        }
-    }
+# DATABASES = {
+#         'default': {
+#             'ENGINE': 'django.db.backends.sqlite3',
+#             'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#         }
+#     }
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',
