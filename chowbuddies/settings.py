@@ -254,3 +254,4 @@ PAYSTACK_PUBLIC_KEY=os.getenv("PAYSTACK_PUBLIC_KEY")
 PAYSTACK_WEBHOOK_DOMAIN = 'http://localhost:9000'  # Your domain or ngrok URL for development
 
 
+CSRF_TRUSTED_ORIGINS=['miraved.cloud', '*.miraved.cloud', 'http://localhost:3000', 'https://miraved.cloud', 'https://*.miraved.cloud', ] 
