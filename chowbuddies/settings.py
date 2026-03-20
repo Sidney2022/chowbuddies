@@ -266,4 +266,10 @@ PAYSTACK_PUBLIC_KEY=os.getenv("PAYSTACK_PUBLIC_KEY")
 PAYSTACK_WEBHOOK_DOMAIN = 'http://localhost:9000'  # Your domain or ngrok URL for development
 
 
-CSRF_TRUSTED_ORIGINS=[ 'http://localhost:3000', 'https://miraved.cloud', 'https://*.miraved.cloud', ] 
+CSRF_TRUSTED_ORIGINS=[ 'http://localhost:3000', 'https://miraved.cloud', 'https://*.miraved.cloud', ]
+# Tell Django we're behind a proxy that terminates SSL
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Optional but often needed in proxies
+USE_X_FORWARDED_HOST = True
+# SECURE_SSL_REDIRECT = True  # Redirect HTTP → HTTPS if needed (but Traefik usually handles this) 
