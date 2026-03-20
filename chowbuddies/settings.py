@@ -91,23 +91,35 @@ WSGI_APPLICATION = 'chowbuddies.wsgi.application'
 #     }
 # else:
     # Fallback to SQLite
-DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-        }
-    }
+    
+    
+# DATABASES = {
+#         'default': {
+#             'ENGINE': 'django.db.backends.sqlite3',
+#             'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#         }
+#     }
+
+
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': os.environ.get('DATABASE_NAME'),
-#         'USER': os.environ.get('DATABASE_USER'),
-#         'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
-#         'HOST': os.environ.get('DATABASE_HOST'),
-#         'PORT': os.environ.get('DATABASE_PORT'),
+#         'NAME': os.getenv('DATABASE_NAME'),
+#         'USER': os.getenv('DATABASE_USER'),
+#         'PASSWORD': os.getenv('DATABASE_PASSWORD'),
+#         'HOST': os.getenv('DATABASE_HOST'),
+#         'PORT': os.getenv('DATABASE_PORT'),
 #     }
 # }
 
+
+DATABASES = {
+    'default': dj_database_url.config(
+        default=os.getenv('DATABASE_URL'),
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -254,4 +266,4 @@ PAYSTACK_PUBLIC_KEY=os.getenv("PAYSTACK_PUBLIC_KEY")
 PAYSTACK_WEBHOOK_DOMAIN = 'http://localhost:9000'  # Your domain or ngrok URL for development
 
 
-CSRF_TRUSTED_ORIGINS=['miraved.cloud', '*.miraved.cloud', 'http://localhost:3000', 'https://miraved.cloud', 'https://*.miraved.cloud', ] 
+CSRF_TRUSTED_ORIGINS=[ 'http://localhost:3000', 'https://miraved.cloud', 'https://*.miraved.cloud', ] 
