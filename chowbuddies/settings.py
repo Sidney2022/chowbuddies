@@ -266,7 +266,7 @@ PAYSTACK_PUBLIC_KEY=os.getenv("PAYSTACK_PUBLIC_KEY")
 PAYSTACK_WEBHOOK_DOMAIN = 'http://localhost:9000'  # Your domain or ngrok URL for development
 
 
-CSRF_TRUSTED_ORIGINS=[ 'http://localhost:3000', 'https://miraved.cloud', 'https://*.miraved.cloud', ]
+CSRF_TRUSTED_ORIGINS=[ 'http://localhost:3000', 'http://*.miraved.cloud', 'https://www.*.miraved.cloud''https://miraved.cloud', 'https://*.miraved.cloud', ]
 # Tell Django we're behind a proxy that terminates SSL
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
