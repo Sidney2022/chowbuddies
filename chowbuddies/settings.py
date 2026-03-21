@@ -16,7 +16,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY=os.getenv('SECRET_KEY')
 DEBUG = True #os.getenv('DEBUG', '0') == '1'
 
-ALLOWED_HOSTS = ['*'] 
+ALLOWED_HOSTS = ['chowbud.miraved.cloud', 'localhost', '127.0.0.1'] 
 
 # Application definition
 
@@ -266,7 +266,7 @@ PAYSTACK_PUBLIC_KEY=os.getenv("PAYSTACK_PUBLIC_KEY")
 PAYSTACK_WEBHOOK_DOMAIN = 'http://localhost:9000'  # Your domain or ngrok URL for development
 
 
-CSRF_TRUSTED_ORIGINS=[ 'http://localhost:3000', 'http://*.miraved.cloud', 'https://www.*.miraved.cloud''https://miraved.cloud', 'https://*.miraved.cloud', ]
+CSRF_TRUSTED_ORIGINS=[  'https://chowbud.miraved.cloud', ]
 # Tell Django we're behind a proxy that terminates SSL
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # settings.py
