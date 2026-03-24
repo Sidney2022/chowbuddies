@@ -73,5 +73,5 @@ urlpatterns = [
     path('methods', views.PaymentMethodView.as_view()),
     
     path('verify/<str:token>/<str:email>/', views.verify_email, name='verify_email'),
-    
+    path('check-email/', views.check_email, name='check_email'),
 ]

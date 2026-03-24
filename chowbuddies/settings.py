@@ -16,7 +16,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY=os.getenv('SECRET_KEY')
 DEBUG = True #os.getenv('DEBUG', '0') == '1'
 
-ALLOWED_HOSTS = ['chowbud.miraved.cloud', 'localhost', '127.0.0.1'] 
+ALLOWED_HOSTS = ['chowbud.miraved.cloud', 'localhost', '127.0.0.1', "*"] 
 
 # Application definition
 
@@ -274,5 +274,5 @@ SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
 # Optional but often needed in proxies
-USE_X_FORWARDED_HOST = True
+USE_X_FORWARDED_PORT = True
 SECURE_SSL_REDIRECT = True  # Redirect HTTP → HTTPS if needed (but Traefik usually handles this) 

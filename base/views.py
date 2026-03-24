@@ -1088,3 +1088,15 @@ class PaymentMethodView(generics.ListAPIView, generics.RetrieveAPIView):
         return self.list(self, *args, **kwargs)
     
 
+
+
+
+def check_email(request):
+    if request.method != 'POST':
+        return render(request, 'main/index.html')
+    email = request.POST['email']
+    print("email is ", email)
+    if not email:
+        return JsonResponse({"error": "Email parameter is required"}, status=400)
+    exists = Profile.objects.filter(email=email).exists()
+    return JsonResponse({"exists": exists})
